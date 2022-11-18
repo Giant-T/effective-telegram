@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use arduino_hal::{port::{Pin, mode}, simple_pwm::{IntoPwmPin, PwmPinOps}, pac::adc::adc::W};
+use arduino_hal::{port::{Pin, mode}, simple_pwm::{IntoPwmPin, PwmPinOps}};
 use panic_halt as _;
 
 struct ColoredLed<TC1, PIN1, TC2, PIN2, TC3, PIN3> {

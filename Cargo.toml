@@ -1,12 +1,12 @@
 [package]
-name = "code-getter"
+name = "effective-telegram"
 version = "0.1.0"
 authors = ["William Boudreault <boudreaultwilliam@gmail.com>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [[bin]]
-name = "code-getter"
+name = "effective-telegram"
 test = false
 bench = false
 
