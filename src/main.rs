@@ -27,12 +27,10 @@ fn main() -> ! {
         pins.d4.into_output().into_pwm(&pwm_timer0),
     );
 
-    colored_led.set_color(0, 255, 0);
+    colored_led.set_color(120, 50, 0);
 
     loop {
-        colored_led.enable();
-        arduino_hal::delay_ms(1000);
-        colored_led.disable();
+        colored_led.toggle();
         arduino_hal::delay_ms(1000);
     }
 }
