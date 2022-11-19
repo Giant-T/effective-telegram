@@ -42,7 +42,7 @@ fn main() -> ! {
         pins.d8.into_output(),
     );
 
-    display.display(7);
+    display.display(9);
 
     loop {
         colored_led.toggle();

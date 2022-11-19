@@ -1,7 +1,4 @@
-use arduino_hal::{
-    hal::port::Dynamic,
-    port::{mode::Output, Pin, PinOps},
-};
+use arduino_hal::port::{mode::Output, Pin, PinOps};
 
 const NUMBERS: [[bool; 8]; 10] = [
     [false, true, true, true, true, true, true, false], // 0
