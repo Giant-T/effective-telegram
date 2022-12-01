@@ -57,6 +57,8 @@ impl<
         };
     }
 
+    /// Affiche un chiffre entre 0 et 9 sur
+    /// l'afficheur a sept segments.
     pub fn display(&mut self, number: u8) {
         Self::change_segment(NUMBERS[number as usize][0], &mut self.pin_dp);
         Self::change_segment(NUMBERS[number as usize][1], &mut self.pin_a);
