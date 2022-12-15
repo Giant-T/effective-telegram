@@ -1,10 +1,7 @@
 #![no_std]
 #![no_main]
 
-use effective_telegram::{
-    buzzer::{self, Note, NoteWithDuration},
-    display, led,
-};
+use effective_telegram::{buzzer, display, led};
 
 use arduino_hal::simple_pwm::IntoPwmPin;
 
@@ -38,12 +35,6 @@ fn start() -> ! {
 
     // Initialisation du passive buzzer
     let mut buzzer = buzzer::Passive::new(pins.d13.into_output().into_pwm(&pwm_timer0));
-    let music: [NoteWithDuration; 2] = [
-        NoteWithDuration::new(Note::C1, 1000),
-        NoteWithDuration::new(Note::A3, 2000),
-    ];
-
-    buzzer.play_music(&music);
 
     // Initialisation de l'afficheur a sept segment
     let mut display = display::SevenSegmentDisplay::new(
