@@ -3,17 +3,20 @@
 
 use effective_telegram::{buzzer, display, led};
 
-use arduino_hal::simple_pwm::IntoPwmPin;
+use arduino_hal::{prelude::_void_ResultVoidExt, simple_pwm::IntoPwmPin};
+
+use embedded_hal::serial::Read;
 
 use panic_halt as _;
 
 #[arduino_hal::entry]
 fn start() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
+    // Obtention de toutes les pins
     let pins = arduino_hal::pins!(dp);
 
     // Pour la communication avec le port serie
-    // let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
+    let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
 
     // Utilise des timers puisque les pins pwm envoie du courant sur une intervale de temps
     let pwm_timer3 = arduino_hal::simple_pwm::Timer3Pwm::new(
@@ -31,10 +34,12 @@ fn start() -> ! {
         pins.d3.into_output().into_pwm(&pwm_timer3),
         pins.d4.into_output().into_pwm(&pwm_timer0),
     );
-    colored_led.set_color(0xff, 0, 0);
+    colored_led.set_color(0, 0, 0xff);
+    colored_led.enable();
 
     // Initialisation du passive buzzer
     let mut buzzer = buzzer::Passive::new(pins.d13.into_output().into_pwm(&pwm_timer0));
+    buzzer.stop();
 
     // Initialisation de l'afficheur a sept segment
     let mut display = display::SevenSegmentDisplay::new(
@@ -47,17 +52,58 @@ fn start() -> ! {
         pins.d12.into_output(),
         pins.d8.into_output(),
     );
-    let mut number: u8 = 9;
+
+    let mut code: [u8; 4] = [1, 2, 3, 4];
+    let mut code_index: usize = 0;
+    let mut code_input: [u8; 4] = [0, 0, 0, 0];
+    let mut mode: u8 = 0; // 0 = normal; 1 = password; 2 = change
 
     loop {
-        colored_led.toggle();
-        display.display(number);
+        buzzer.stop();
+        let input = nb::block!(serial.read()).void_unwrap() as u8;
 
-        arduino_hal::delay_ms(1000);
-
-        number -= 1;
-        if number <= 0 {
-            number = 9;
+        if mode == 0 {
+            if input < 10 {
+                display.display(input);
+            } else if input == 11 {
+                colored_led.set_color(255, 100, 0);
+                code_index = 0;
+                mode = 1;
+            } else if input == 12 {
+                colored_led.set_color(120, 0, 120);
+                code_index = 0;
+                mode = 2;
+            }
+        } else if mode == 1 {
+            if input < 10 {
+                display.display(input);
+                code_input[code_index] = input;
+                code_index += 1;
+            }
+            if code_index > 3 {
+                mode = 0;
+                if code == code_input {
+                    colored_led.set_color(0, 0xff, 0);
+                } else {
+                    colored_led.set_color(0xff, 0, 0);
+                    buzzer.play();
+                }
+                arduino_hal::delay_ms(1000);
+                colored_led.set_color(0, 0, 0xff);
+            }
+        } else if mode == 2 {
+            if input < 10 {
+                display.display(input);
+                code_input[code_index] = input;
+                code_index += 1;
+            }
+            if code_index > 3 {
+                mode = 0;
+                colored_led.set_color(0, 0xff, 0);
+                code = code_input;
+                arduino_hal::delay_ms(1000);
+                colored_led.set_color(0, 0, 0xff);
+            }
         }
     }
 }

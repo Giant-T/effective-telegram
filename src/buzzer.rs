@@ -23,8 +23,8 @@ impl<TC, PIN: PwmPinOps<TC>> Passive<TC, PIN> {
         self.is_enabled
     }
 
-    pub fn play_note(&mut self) {
-        self.pin.set_duty(255);
+    pub fn play(&mut self) {
+        self.pin.set_duty(100);
         self.pin.enable();
         self.is_enabled = true;
     }
