@@ -12,6 +12,7 @@ pub struct Passive<TC, PIN> {
 }
 
 impl<TC, PIN: PwmPinOps<TC>> Passive<TC, PIN> {
+    // Constructeur pour le buzzer passif.
     pub fn new(pin: Pin<mode::PwmOutput<TC>, PIN>) -> Self {
         return Self {
             pin,

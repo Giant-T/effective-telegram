@@ -71,12 +71,15 @@ fn start() -> ! {
         match mode {
             Mode::Command => {
                 if input < 10 {
+                    // Affiche un nombre
                     display.display(input);
                 } else if input == 11 {
+                    // Change le mode en mot de passe
                     colored_led.set_color(255, 100, 0);
                     code_index = 0;
                     mode = Mode::Password;
                 } else if input == 12 {
+                    // Change le mode en changement de mot de passe
                     colored_led.set_color(120, 0, 120);
                     code_index = 0;
                     mode = Mode::Change;
@@ -84,19 +87,24 @@ fn start() -> ! {
             }
             Mode::Password => {
                 if input < 10 {
+                    // Affiche un nombre
                     display.display(input);
                     code_input[code_index] = input;
                     code_index += 1;
                 } else if input == 13 {
+                    // Quitte le mode
                     mode = Mode::Command;
                     colored_led.set_color(0, 0, 0xff);
                     ufmt::uwrite!(&mut serial, "{}", 1).void_unwrap();
                 }
                 if code_index > 3 {
+                    // Quitte le mode
                     mode = Mode::Command;
                     if code == code_input {
+                        // Affiche une led verte
                         colored_led.set_color(0, 0xff, 0);
                     } else {
+                        // Affiche la led en rouge et joue un son
                         colored_led.set_color(0xff, 0, 0);
                         buzzer.play();
                     }
@@ -106,15 +114,18 @@ fn start() -> ! {
             }
             Mode::Change => {
                 if input < 10 {
+                    // Affiche un nombre
                     display.display(input);
                     code_input[code_index] = input;
                     code_index += 1;
                 } else if input == 13 {
+                    // Quitte le mode
                     mode = Mode::Command;
                     colored_led.set_color(0, 0, 0xff);
                     ufmt::uwrite!(&mut serial, "{}", 1).void_unwrap();
                 }
                 if code_index > 3 {
+                    // Quitte le mode puis enregistre le nouveau mot de passe
                     mode = Mode::Command;
                     colored_led.set_color(0, 0xff, 0);
                     code = code_input;

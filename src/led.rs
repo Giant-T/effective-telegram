@@ -13,6 +13,7 @@ pub struct ColoredLed<TC1, PIN1, TC2, PIN2, TC3, PIN3> {
 impl<TC1, PIN1: PwmPinOps<TC1>, TC2, PIN2: PwmPinOps<TC2>, TC3, PIN3: PwmPinOps<TC3>>
     ColoredLed<TC1, PIN1, TC2, PIN2, TC3, PIN3>
 {
+    // Constructeur pour la led
     pub fn new(
         red_pin: Pin<mode::PwmOutput<TC1>, PIN1>,
         green_pin: Pin<mode::PwmOutput<TC2>, PIN2>,
@@ -26,6 +27,7 @@ impl<TC1, PIN1: PwmPinOps<TC1>, TC2, PIN2: PwmPinOps<TC2>, TC3, PIN3: PwmPinOps<
         };
     }
 
+    // Allume la led
     pub fn enable(&mut self) {
         self.red_pin.enable();
         self.green_pin.enable();
@@ -33,6 +35,7 @@ impl<TC1, PIN1: PwmPinOps<TC1>, TC2, PIN2: PwmPinOps<TC2>, TC3, PIN3: PwmPinOps<
         self.is_enabled = true;
     }
 
+    // Eteint la led
     pub fn disable(&mut self) {
         self.red_pin.disable();
         self.green_pin.disable();
@@ -40,6 +43,7 @@ impl<TC1, PIN1: PwmPinOps<TC1>, TC2, PIN2: PwmPinOps<TC2>, TC3, PIN3: PwmPinOps<
         self.is_enabled = false;
     }
 
+    // Eteint ou ferme la led selon
     pub fn toggle(&mut self) {
         if self.is_enabled {
             self.disable();

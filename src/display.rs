@@ -35,6 +35,7 @@ impl<
         PINDP: PinOps,
     > SevenSegmentDisplay<PINA, PINB, PINC, PIND, PINE, PINF, PING, PINDP>
 {
+    // Constructeur pour l'afficheur a sept segments
     pub fn new(
         pin_a: Pin<Output, PINA>,
         pin_b: Pin<Output, PINB>,
@@ -70,6 +71,7 @@ impl<
         Self::change_segment(NUMBERS[number as usize][7], &mut self.pin_g);
     }
 
+    // Change un des segments de l'afficheur
     fn change_segment<PIN: PinOps>(should_be_high: bool, pin: &mut Pin<Output, PIN>) {
         if should_be_high {
             pin.set_high();
