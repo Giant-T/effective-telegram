@@ -9,6 +9,12 @@ use embedded_hal::serial::Read;
 
 use panic_halt as _;
 
+enum Mode {
+    Command,
+    Password,
+    Change,
+}
+
 #[arduino_hal::entry]
 fn start() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -56,53 +62,65 @@ fn start() -> ! {
     let mut code: [u8; 4] = [1, 2, 3, 4];
     let mut code_index: usize = 0;
     let mut code_input: [u8; 4] = [0, 0, 0, 0];
-    let mut mode: u8 = 0; // 0 = normal; 1 = password; 2 = change
+    let mut mode: Mode = Mode::Command;
 
     loop {
         buzzer.stop();
         let input = nb::block!(serial.read()).void_unwrap() as u8;
 
-        if mode == 0 {
-            if input < 10 {
-                display.display(input);
-            } else if input == 11 {
-                colored_led.set_color(255, 100, 0);
-                code_index = 0;
-                mode = 1;
-            } else if input == 12 {
-                colored_led.set_color(120, 0, 120);
-                code_index = 0;
-                mode = 2;
-            }
-        } else if mode == 1 {
-            if input < 10 {
-                display.display(input);
-                code_input[code_index] = input;
-                code_index += 1;
-            }
-            if code_index > 3 {
-                mode = 0;
-                if code == code_input {
-                    colored_led.set_color(0, 0xff, 0);
-                } else {
-                    colored_led.set_color(0xff, 0, 0);
-                    buzzer.play();
+        match mode {
+            Mode::Command => {
+                if input < 10 {
+                    display.display(input);
+                } else if input == 11 {
+                    colored_led.set_color(255, 100, 0);
+                    code_index = 0;
+                    mode = Mode::Password;
+                } else if input == 12 {
+                    colored_led.set_color(120, 0, 120);
+                    code_index = 0;
+                    mode = Mode::Change;
                 }
-                arduino_hal::delay_ms(1000);
-                colored_led.set_color(0, 0, 0xff);
             }
-        } else if mode == 2 {
-            if input < 10 {
-                display.display(input);
-                code_input[code_index] = input;
-                code_index += 1;
+            Mode::Password => {
+                if input < 10 {
+                    display.display(input);
+                    code_input[code_index] = input;
+                    code_index += 1;
+                } else if input == 13 {
+                    mode = Mode::Command;
+                    colored_led.set_color(0, 0, 0xff);
+                    ufmt::uwrite!(&mut serial, "{}", 1).void_unwrap();
+                }
+                if code_index > 3 {
+                    mode = Mode::Command;
+                    if code == code_input {
+                        colored_led.set_color(0, 0xff, 0);
+                    } else {
+                        colored_led.set_color(0xff, 0, 0);
+                        buzzer.play();
+                    }
+                    arduino_hal::delay_ms(1000);
+                    colored_led.set_color(0, 0, 0xff);
+                }
             }
-            if code_index > 3 {
-                mode = 0;
-                colored_led.set_color(0, 0xff, 0);
-                code = code_input;
-                arduino_hal::delay_ms(1000);
-                colored_led.set_color(0, 0, 0xff);
+            Mode::Change => {
+                if input < 10 {
+                    display.display(input);
+                    code_input[code_index] = input;
+                    code_index += 1;
+                } else if input == 13 {
+                    mode = Mode::Command;
+                    colored_led.set_color(0, 0, 0xff);
+                    ufmt::uwrite!(&mut serial, "{}", 1).void_unwrap();
+                }
+                if code_index > 3 {
+                    mode = Mode::Command;
+                    colored_led.set_color(0, 0xff, 0);
+                    code = code_input;
+                    arduino_hal::delay_ms(1000);
+                    colored_led.set_color(0, 0, 0xff);
+                }
             }
         }
     }

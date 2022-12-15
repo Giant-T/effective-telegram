@@ -1,7 +1,9 @@
 import serial
 import re
 
-ser = serial.Serial(port='COM3', baudrate=57600)
+ser = serial.Serial(port='COM3', baudrate=57600, timeout=1)
+ser.setDTR(True)
+ser.setRTS(True)
 
 
 def main():
@@ -22,7 +24,9 @@ def main():
             elif re.search('^[0-9]$', operation):
                 ser.write(int(operation).to_bytes(1, byteorder='big'))
             elif operation == 'q':
-                shouldRun = False
+                ser.write((13).to_bytes(1, byteorder='big'))
+                if ser.read() != b'1':
+                    shouldRun = False
 
 
 if __name__ == '__main__':

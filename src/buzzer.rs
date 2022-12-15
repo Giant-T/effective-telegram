@@ -23,12 +23,14 @@ impl<TC, PIN: PwmPinOps<TC>> Passive<TC, PIN> {
         self.is_enabled
     }
 
+    // Joue une note
     pub fn play(&mut self) {
         self.pin.set_duty(100);
         self.pin.enable();
         self.is_enabled = true;
     }
 
+    // Arrete tout les sons sortants de cette pin
     pub fn stop(&mut self) {
         self.pin.disable();
         self.is_enabled = false;
